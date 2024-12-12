@@ -399,12 +399,12 @@ document.addEventListener('DOMContentLoaded', function() {
             row.querySelector('.date-edit').style.display = 'block';
             row.querySelector('.suburb-display').style.display = 'none';
             row.querySelector('.suburb-edit').style.display = 'flex';
+            row.querySelector('.quote-value-display').style.display = 'none';
+            row.querySelector('.quote-value-edit').style.display = 'block';
+            row.querySelector('.sold-value-display').style.display = 'none';
+            row.querySelector('.sold-value-edit').style.display = 'block';
             row.querySelector('.comments-display').style.display = 'none';
             row.querySelector('.comments-edit').style.display = 'block';
-            row.querySelectorAll('.currency-field').forEach(field => {
-                const value = field.dataset.value || '0.00';
-                field.innerHTML = `<input type="number" step="0.01" class="form-control" value="${value}">`;
-            });
             
             // Toggle buttons
             this.style.display = 'none';
@@ -504,37 +504,33 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             const row = this.closest('tr');
             
-            // Restore original values
+            // Hide edit controls and show display fields
             row.querySelector('.ref-display').style.display = 'block';
             row.querySelector('.ref-edit').style.display = 'none';
-            
             row.querySelector('.cons-display').style.display = 'block';
             row.querySelector('.cons-select').style.display = 'none';
-            
             row.querySelector('.source-display').style.display = 'block';
             row.querySelector('.source-select').style.display = 'none';
-            
             row.querySelector('.date-display').style.display = 'block';
             row.querySelector('.date-edit').style.display = 'none';
-            
             row.querySelector('.suburb-display').style.display = 'block';
             row.querySelector('.suburb-edit').style.display = 'none';
-            
+            row.querySelector('.quote-value-display').style.display = 'block';
+            row.querySelector('.quote-value-edit').style.display = 'none';
+            row.querySelector('.sold-value-display').style.display = 'block';
+            row.querySelector('.sold-value-edit').style.display = 'none';
             row.querySelector('.comments-display').style.display = 'block';
             row.querySelector('.comments-edit').style.display = 'none';
             
+            // Reset select fields to original values
             row.querySelector('.cons-select').value = row.querySelector('.cons-select').dataset.originalValue;
             row.querySelector('.source-select').value = row.querySelector('.source-select').dataset.originalValue;
             row.querySelector('.suburb-select').value = row.querySelector('.suburb-select').dataset.originalValue;
             
-            row.querySelectorAll('.currency-field').forEach(field => {
-                field.innerHTML = formatCurrency(field.dataset.value);
-            });
-
-            // Toggle buttons back
-            this.style.display = 'none';
-            row.querySelector('.save-quote').style.display = 'none';
+            // Toggle buttons
             row.querySelector('.edit-quote').style.display = 'inline-block';
+            row.querySelector('.save-quote').style.display = 'none';
+            this.style.display = 'none';
         });
     });
 
