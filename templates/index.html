@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Shower Design{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h1>Welcome to Shower Design</h1>
+                    <p>Custom shower solutions for your home</p>
+                    <div class="mt-4">
+                        <a href="{{ url_for('contact') }}" class="btn btn-primary">Get a Quote</a>
+                        <a href="{{ url_for('quotes') }}" class="btn btn-secondary">View Quotes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
