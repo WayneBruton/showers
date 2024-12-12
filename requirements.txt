@@ -2,6 +2,7 @@ Flask==3.0.0
 Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.1
 email-validator==2.1.0.post1
+gunicorn==22.0.0
 python-dotenv==1.0.0
 pymongo==4.6.1
 flask-pymongo==2.3.0
