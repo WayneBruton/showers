@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+
+{% block title %}Quotes{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#newQuoteForm">
+            Create New Quote
+        </button>
+    </div>
+</div>
+
+<div class="collapse mb-4" id="newQuoteForm">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="card-title mb-4">New Quote</h3>
+            <form method="POST" action="{{ url_for('quotes') }}">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="ref" class="form-label">Reference</label>
+                        <input type="text" class="form-control" id="ref" name="ref">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="cons" class="form-label">Cons *</label>
+                        <select class="form-select" id="cons" name="cons" required>
+                            <option value="DR">DR</option>
+                            <option value="ET">ET</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="source" class="form-label">Source *</label>
+                        <select class="form-select" id="source" name="source" required>
+                            <option value="">Please select</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="The Business Connection">The Business Connection</option>
+                            <option value="Renovating Moms">Renovating Moms</option>
+                            <option value="The Best Thing Ever">The Best Thing Ever</option>
+                            <option value="Referral/Word Of Mouth">Referral/Word Of Mouth</option>
+                            <option value="Previous Client">Previous Client</option>
+                            <option value="Search Engine">Search Engine</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="client_name" class="form-label">Client Name *</label>
+                        <input type="text" class="form-control" id="client_name" name="client_name" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="suburb" class="form-label">Suburb *</label>
+                        <select class="form-select bg-white text-dark" id="suburb" name="suburb" required 
+                                style="color: #000000 !important; background-color: #ffffff !important;">
+                            <option value="" style="color: #000000; background-color: #ffffff;">Please select</option>
+                            {% for suburb in suburbs %}
+                            <option value="{{ suburb['Suburb'] }}" style="color: #000000; background-color: #ffffff;">
+                                {{ suburb["Suburb"] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="amount" class="form-label">Quote Value</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R</span>
+                            <input type="number" step="0.01" class="form-control" id="amount" name="amount">
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="comments" class="form-label">Comments</label>
+                        <input type="text" class="form-control" id="comments" name="comments">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="sold_value" class="form-label">Sold Value</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R</span>
+                            <input type="number" step="0.01" class="form-control" id="sold_value" name="sold_value">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Quote</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="card-title mb-0">Quotes List</h1>
+            <div class="d-flex align-items-center">
+                <div class="input-group me-3" style="width: 300px;">
+                    <input type="text" id="quoteFilter" class="form-control" placeholder="Search by reference or name...">
+                    <button class="btn btn-outline-secondary" type="button" id="clearFilter">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Ref</th>
+                        <th>Cons</th>
+                        <th>Source</th>
+                        <th>Date</th>
+                        <th>Client</th>
+                        <th>Suburb</th>
+                        <th>Quote Value</th>
+                        <th>Comments</th>
+                        <th>Sold Value</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for quote in quotes %}
+                    <tr data-quote-id="{{ quote._id }}">
+                        <td>
+                            <div class="ref-display">{{ quote.ref or '' }}</div>
+                            <input type="text" class="form-control ref-edit" style="display: none;" value="{{ quote.ref or '' }}">
+                        </td>
+                        <td>
+                            <div class="cons-display">{{ quote.cons }}</div>
+                            <select class="form-select cons-select" style="display: none;" data-original-value="{{ quote.cons }}">
+                                <option value="DR" {% if quote.cons == 'DR' %}selected{% endif %}>DR</option>
+                                <option value="ET" {% if quote.cons == 'ET' %}selected{% endif %}>ET</option>
+                            </select>
+                        </td>
+                        <td>
+                            <div class="source-display">{{ quote.source }}</div>
+                            <select class="form-select source-select" style="display: none;" data-original-value="{{ quote.source }}">
+                                <option value="">Please select</option>
+                                <option value="Facebook" {% if quote.source == 'Facebook' %}selected{% endif %}>Facebook</option>
+                                <option value="Instagram" {% if quote.source == 'Instagram' %}selected{% endif %}>Instagram</option>
+                                <option value="The Business Connection" {% if quote.source == 'The Business Connection' %}selected{% endif %}>The Business Connection</option>
+                                <option value="Renovating Moms" {% if quote.source == 'Renovating Moms' %}selected{% endif %}>Renovating Moms</option>
+                                <option value="The Best Thing Ever" {% if quote.source == 'The Best Thing Ever' %}selected{% endif %}>The Best Thing Ever</option>
+                                <option value="Referral/Word Of Mouth" {% if quote.source == 'Referral/Word Of Mouth' %}selected{% endif %}>Referral/Word Of Mouth</option>
+                                <option value="Previous Client" {% if quote.source == 'Previous Client' %}selected{% endif %}>Previous Client</option>
+                                <option value="Search Engine" {% if quote.source == 'Search Engine' %}selected{% endif %}>Search Engine</option>
+                            </select>
+                        </td>
+                        <td>{{ quote.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ quote.first_name }} {{ quote.last_name }}</td>
+                        <td>
+                            <div class="suburb-display">{{ quote.suburb }}</div>
+                            <div class="input-group suburb-edit" style="display: none;">
+                                <select class="form-select suburb-select bg-white text-dark" data-original-value="{{ quote.suburb }}"
+                                        style="color: #000000 !important; background-color: #ffffff !important;">
+                                    {% for suburb in suburbs %}
+                                    <option value="{{ suburb['Suburb'] }}" {% if suburb['Suburb'] == quote.suburb %}selected{% endif %}
+                                            style="color: #000000; background-color: #ffffff;">
+                                        {{ suburb["Suburb"] }}
+                                    </option>
+                                    {% endfor %}
+                                    <option value="other" style="color: #000000; background-color: #ffffff;">Other (Add New)</option>
+                                </select>
+                                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#newSuburbModal">
+                                    <i class="bi bi-plus-circle"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td class="currency-field" data-value="{{ quote.amount }}">
+                            {% if quote.amount %}R{{ "%.2f"|format(quote.amount) }}{% else %}R0.00{% endif %}
+                        </td>
+                        <td>
+                            <div class="comments-display">{{ quote.comments or '' }}</div>
+                            <textarea class="form-control comments-edit" style="display: none;">{{ quote.comments or '' }}</textarea>
+                        </td>
+                        <td class="currency-field" data-value="{{ quote.sold_value }}">
+                            {% if quote.sold_value %}R{{ "%.2f"|format(quote.sold_value) }}{% else %}R0.00{% endif %}
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-primary btn-sm edit-quote">
+                                <i class="bi bi-pencil"></i> Edit
+                            </button>
+                            <button type="button" class="btn btn-success btn-sm save-quote" style="display: none;">
+                                <i class="bi bi-check"></i> Save
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm cancel-edit" style="display: none;">
+                                <i class="bi bi-x"></i> Cancel
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for adding new suburb -->
+<div class="modal fade" id="newSuburbModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Suburb</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="new_suburb" class="form-label">Suburb Name</label>
+                    <input type="text" class="form-control" id="new_suburb" name="new_suburb">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addNewSuburb()">Add Suburb</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function addNewSuburb() {
+    const newSuburb = document.getElementById('new_suburb').value;
+    if (!newSuburb) {
+        alert('Please enter a suburb name');
+        return;
+    }
+
+    fetch('/add_suburb', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `new_suburb=${encodeURIComponent(newSuburb)}`
+    })
+    .then(response => response.text())
+    .then(suburb => {
+        if (suburb && suburb !== 'Error') {
+            // Add new suburb to all dropdowns
+            const suburbSelects = document.querySelectorAll('.suburb-select');
+            suburbSelects.forEach(select => {
+                const option = document.createElement('option');
+                option.value = suburb;
+                option.textContent = suburb;
+                option.style.color = '#000000';
+                option.style.backgroundColor = '#ffffff';
+                // Insert before the "Other" option
+                select.insertBefore(option, select.lastElementChild);
+            });
+            
+            // Close the modal
+            const modal = document.getElementById('newSuburbModal');
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            bootstrapModal.hide();
+            
+            // Clear the input
+            document.getElementById('new_suburb').value = '';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Format currency fields
+    function formatCurrency(value) {
+        return 'R' + parseFloat(value || 0).toFixed(2);
+    }
+
+    // Handle edit button clicks
+    document.querySelectorAll('.edit-quote').forEach(button => {
+        button.addEventListener('click', function() {
+            const row = this.closest('tr');
+            
+            // Show edit controls
+            row.querySelector('.ref-display').style.display = 'none';
+            row.querySelector('.ref-edit').style.display = 'block';
+            row.querySelector('.cons-display').style.display = 'none';
+            row.querySelector('.cons-select').style.display = 'block';
+            row.querySelector('.source-display').style.display = 'none';
+            row.querySelector('.source-select').style.display = 'block';
+            row.querySelector('.suburb-display').style.display = 'none';
+            row.querySelector('.suburb-edit').style.display = 'flex';
+            row.querySelector('.comments-display').style.display = 'none';
+            row.querySelector('.comments-edit').style.display = 'block';
+            row.querySelectorAll('.currency-field').forEach(field => {
+                const value = field.dataset.value || '0.00';
+                field.innerHTML = `<input type="number" step="0.01" class="form-control" value="${value}">`;
+            });
+            
+            // Toggle buttons
+            this.style.display = 'none';
+            row.querySelector('.save-quote').style.display = 'inline-block';
+            row.querySelector('.cancel-edit').style.display = 'inline-block';
+        });
+    });
+
+    // Handle save button clicks
+    document.querySelectorAll('.save-quote').forEach(button => {
+        button.addEventListener('click', async function() {
+            const row = this.closest('tr');
+            const quoteId = row.dataset.quoteId;
+            
+            // Gather updated data
+            const updates = {
+                ref: row.querySelector('.ref-edit').value,
+                cons: row.querySelector('.cons-select').value,
+                source: row.querySelector('.source-select').value,
+                suburb: row.querySelector('.suburb-select').value,
+                comments: row.querySelector('.comments-edit').value,
+                amount: row.querySelector('td:nth-child(7) input').value,
+                sold_value: row.querySelector('td:nth-child(9) input').value
+            };
+
+            console.log('Sending updates:', updates);  // Debug log
+
+            try {
+                // Send update to server
+                const response = await fetch(`/api/quotes/${quoteId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updates)
+                });
+
+                console.log('Response status:', response.status);  // Debug log
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to update quote');
+                }
+
+                const data = await response.json();
+                console.log('Response data:', data);  // Debug log
+
+                if (data.success) {
+                    // Update display
+                    row.querySelector('.ref-display').textContent = updates.ref;
+                    row.querySelector('.ref-display').style.display = 'block';
+                    row.querySelector('.ref-edit').style.display = 'none';
+                    
+                    row.querySelector('.cons-display').textContent = updates.cons;
+                    row.querySelector('.cons-display').style.display = 'block';
+                    row.querySelector('.cons-select').style.display = 'none';
+                    
+                    row.querySelector('.source-display').textContent = updates.source;
+                    row.querySelector('.source-display').style.display = 'block';
+                    row.querySelector('.source-select').style.display = 'none';
+                    
+                    row.querySelector('.suburb-display').textContent = updates.suburb;
+                    row.querySelector('.suburb-display').style.display = 'block';
+                    row.querySelector('.suburb-edit').style.display = 'none';
+                    
+                    row.querySelector('.comments-display').textContent = updates.comments;
+                    row.querySelector('.comments-display').style.display = 'block';
+                    row.querySelector('.comments-edit').style.display = 'none';
+                    
+                    row.querySelectorAll('.currency-field').forEach(field => {
+                        const input = field.querySelector('input');
+                        field.dataset.value = input.value;
+                        field.innerHTML = formatCurrency(input.value);
+                    });
+
+                    // Toggle buttons back
+                    this.style.display = 'none';
+                    row.querySelector('.cancel-edit').style.display = 'none';
+                    row.querySelector('.edit-quote').style.display = 'inline-block';
+                } else {
+                    throw new Error('Failed to update quote');
+                }
+            } catch (error) {
+                console.error('Error updating quote:', error);
+                alert('Failed to update quote: ' + error.message);
+            }
+        });
+    });
+
+    // Handle cancel button clicks
+    document.querySelectorAll('.cancel-edit').forEach(button => {
+        button.addEventListener('click', function() {
+            const row = this.closest('tr');
+            
+            // Restore original values
+            row.querySelector('.ref-display').style.display = 'block';
+            row.querySelector('.ref-edit').style.display = 'none';
+            
+            row.querySelector('.cons-display').style.display = 'block';
+            row.querySelector('.cons-select').style.display = 'none';
+            
+            row.querySelector('.source-display').style.display = 'block';
+            row.querySelector('.source-select').style.display = 'none';
+            
+            row.querySelector('.suburb-display').style.display = 'block';
+            row.querySelector('.suburb-edit').style.display = 'none';
+            
+            row.querySelector('.comments-display').style.display = 'block';
+            row.querySelector('.comments-edit').style.display = 'none';
+            
+            row.querySelector('.cons-select').value = row.querySelector('.cons-select').dataset.originalValue;
+            row.querySelector('.source-select').value = row.querySelector('.source-select').dataset.originalValue;
+            row.querySelector('.suburb-select').value = row.querySelector('.suburb-select').dataset.originalValue;
+            
+            row.querySelectorAll('.currency-field').forEach(field => {
+                field.innerHTML = formatCurrency(field.dataset.value);
+            });
+
+            // Toggle buttons back
+            this.style.display = 'none';
+            row.querySelector('.save-quote').style.display = 'none';
+            row.querySelector('.edit-quote').style.display = 'inline-block';
+        });
+    });
+
+    const filterInput = document.getElementById('quoteFilter');
+    const clearButton = document.getElementById('clearFilter');
+    const tableRows = document.querySelectorAll('table tbody tr');
+    
+    function filterTable() {
+        const searchTerm = filterInput.value.toLowerCase().trim();
+        
+        tableRows.forEach(row => {
+            const reference = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+            const clientName = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+            
+            if (searchTerm === '' || 
+                reference.includes(searchTerm) || 
+                clientName.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    filterInput.addEventListener('input', filterTable);
+    
+    clearButton.addEventListener('click', function() {
+        filterInput.value = '';
+        filterTable();
+        filterInput.focus();
+    });
+});
+</script>
+{% endblock %}

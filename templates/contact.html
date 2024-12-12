@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title text-center mb-4">Get In Touch</h1>
+                <p class="text-center mb-4">Describe your custom shower glass project below with as much detail as you can, and we'll get back to you with a quote as soon as possible.</p>
+                
+                <form method="POST" action="{{ url_for('contact') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">First Name *</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Last Name *</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email Address *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="suburb" class="form-label">Suburb *</label>
+                            <div class="input-group">
+                                <select class="form-select bg-white text-dark" id="suburb" name="suburb" required 
+                                        style="color: #000000 !important; background-color: #ffffff !important;">
+                                    <option value="" style="color: #000000; background-color: #ffffff;">Please select</option>
+                                    {% for suburb in suburbs %}
+                                    <option value="{{ suburb['Suburb'] }}" style="color: #000000; background-color: #ffffff;">
+                                        {{ suburb["Suburb"] }}
+                                    </option>
+                                    {% endfor %}
+                                    <option value="other" style="color: #000000; background-color: #ffffff;">Other (Add New)</option>
+                                </select>
+                                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#newSuburbModal">
+                                    <i class="bi bi-plus-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="service" class="form-label">Choose service you are interested in *</label>
+                            <select class="form-select" id="service" name="service" required>
+                                <option value="">Please select</option>
+                                <option value="New Frameless Shower Enclosure or Other Glass Products">New Frameless Shower Enclosure or Other Glass Products</option>
+                                <option value="New Framed Shower Enclosure">New Framed Shower Enclosure</option>
+                                <option value="Repair or Service to your existing Shower">Repair or Service to your existing Shower</option>
+                                <option value="Parts & Spares">Parts & Spares</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="source" class="form-label">How did you hear about us? *</label>
+                        <select class="form-select" id="source" name="source" required>
+                            <option value="">Please select</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="The Business Connection">The Business Connection</option>
+                            <option value="Renovating Moms">Renovating Moms</option>
+                            <option value="The Best Thing Ever">The Best Thing Ever</option>
+                            <option value="Referral/Word Of Mouth">Referral/Word Of Mouth</option>
+                            <option value="Previous Client">Previous Client</option>
+                            <option value="Search Engine">Search Engine</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="information" class="form-label">Please provide some information that will be useful to use when quoting.</label>
+                        <textarea class="form-control" id="information" name="information" rows="5"></textarea>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for adding new suburb -->
+<div class="modal fade" id="newSuburbModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Suburb</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="newSuburbInput" class="form-label">Suburb Name</label>
+                    <input type="text" class="form-control" id="newSuburbInput">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="addNewSuburb()">Add Suburb</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function addNewSuburb() {
+    const newSuburb = document.getElementById('newSuburbInput').value.trim();
+    if (!newSuburb) return;
+
+    fetch('/add_suburb', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'new_suburb=' + encodeURIComponent(newSuburb)
+    })
+    .then(response => response.text())
+    .then(suburb => {
+        const suburbSelect = document.getElementById('suburb');
+        const option = new Option(suburb, suburb);
+        // Insert before the "Other" option
+        suburbSelect.insertBefore(option, suburbSelect.lastChild);
+        suburbSelect.value = suburb;
+        
+        // Close the modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('newSuburbModal'));
+        modal.hide();
+        
+        // Clear the input
+        document.getElementById('newSuburbInput').value = '';
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+{% endblock %}
