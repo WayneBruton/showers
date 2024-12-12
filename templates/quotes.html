@@ -454,41 +454,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Response data:', data);  // Debug log
 
                 if (data.success) {
-                    // Update display
+                    // Update display values
                     row.querySelector('.ref-display').textContent = updates.Ref;
+                    row.querySelector('.cons-display').textContent = updates.Cons;
+                    row.querySelector('.source-display').textContent = updates.Source;
+                    row.querySelector('.date-display').textContent = updates.Date;
+                    row.querySelector('.suburb-display').textContent = updates.Suburb;
+                    row.querySelector('.comments-display').textContent = updates.Comments;
+                    row.querySelector('.quote-value-display').textContent = formatCurrency(updates['Quote Value']);
+                    row.querySelector('.sold-value-display').textContent = formatCurrency(updates['Sold Value']);
+
+                    // Hide edit fields
                     row.querySelector('.ref-display').style.display = 'block';
                     row.querySelector('.ref-edit').style.display = 'none';
-                    
-                    row.querySelector('.cons-display').textContent = updates.Cons;
                     row.querySelector('.cons-display').style.display = 'block';
                     row.querySelector('.cons-select').style.display = 'none';
-                    
-                    row.querySelector('.source-display').textContent = updates.Source;
                     row.querySelector('.source-display').style.display = 'block';
                     row.querySelector('.source-select').style.display = 'none';
-                    
-                    row.querySelector('.date-display').textContent = updates.Date;
                     row.querySelector('.date-display').style.display = 'block';
                     row.querySelector('.date-edit').style.display = 'none';
-                    
-                    row.querySelector('.suburb-display').textContent = updates.Suburb;
                     row.querySelector('.suburb-display').style.display = 'block';
                     row.querySelector('.suburb-edit').style.display = 'none';
-                    
-                    row.querySelector('.comments-display').textContent = updates.Comments;
                     row.querySelector('.comments-display').style.display = 'block';
                     row.querySelector('.comments-edit').style.display = 'none';
-                    
-                    row.querySelectorAll('.currency-field').forEach(field => {
-                        const input = field.querySelector('input');
-                        field.dataset.value = input.value;
-                        field.innerHTML = formatCurrency(input.value);
-                    });
+                    row.querySelector('.quote-value-display').style.display = 'block';
+                    row.querySelector('.quote-value-edit').style.display = 'none';
+                    row.querySelector('.sold-value-display').style.display = 'block';
+                    row.querySelector('.sold-value-edit').style.display = 'none';
 
-                    // Toggle buttons back
-                    this.style.display = 'none';
-                    row.querySelector('.cancel-edit').style.display = 'none';
+                    // Toggle buttons
                     row.querySelector('.edit-quote').style.display = 'inline-block';
+                    row.querySelector('.save-quote').style.display = 'none';
+                    row.querySelector('.cancel-edit').style.display = 'none';
+
+                    showAlert('Quote updated successfully!', 'success');
                 } else {
                     throw new Error('Failed to update quote');
                 }
