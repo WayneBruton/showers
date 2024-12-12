@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Lead{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h1 class="card-title mb-4">Edit Lead</h1>
+        
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="first_name" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" 
+                               value="{{ lead.first_name }}" required>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="last_name" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" 
+                               value="{{ lead.last_name }}" required>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               value="{{ lead.email }}" required>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" 
+                               value="{{ lead.phone }}" required>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="suburb" class="form-label">Suburb</label>
+                        <input type="text" class="form-control" id="suburb" name="suburb" 
+                               value="{{ lead.suburb }}" required>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="service" class="form-label">Service</label>
+                        <select class="form-select" id="service" name="service" required>
+                            <option value="Shower Screen" {% if lead.service == 'Shower Screen' %}selected{% endif %}>Shower Screen</option>
+                            <option value="Splash Back" {% if lead.service == 'Splash Back' %}selected{% endif %}>Splash Back</option>
+                            <option value="Mirror" {% if lead.service == 'Mirror' %}selected{% endif %}>Mirror</option>
+                            <option value="Other" {% if lead.service == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="source" class="form-label">Source</label>
+                        <select class="form-select" id="source" name="source" required>
+                            <option value="Website" {% if lead.source == 'Website' %}selected{% endif %}>Website</option>
+                            <option value="Phone" {% if lead.source == 'Phone' %}selected{% endif %}>Phone</option>
+                            <option value="Email" {% if lead.source == 'Email' %}selected{% endif %}>Email</option>
+                            <option value="Referral" {% if lead.source == 'Referral' %}selected{% endif %}>Referral</option>
+                            <option value="Other" {% if lead.source == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label for="information" class="form-label">Additional Information</label>
+                        <textarea class="form-control" id="information" name="information" 
+                                  rows="4">{{ lead.information }}</textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{{ url_for('leads') }}" class="btn btn-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -248,9 +248,17 @@
                             </select>
                         </td>
                         <td>
-                            <div class="date-display">{{ quote.Date.split(' ')[0] if quote.Date else '' }}</div>
+                            <div class="date-display">
+                                {% if quote.Date %}
+                                    {% if quote.Date is string %}
+                                        {{ quote.Date.split(' ')[0] }}
+                                    {% else %}
+                                        {{ quote.Date.strftime('%Y-%m-%d') }}
+                                    {% endif %}
+                                {% endif %}
+                            </div>
                             <input type="date" class="form-control date-edit" style="display: none;" 
-                                   value="{{ quote.Date.split(' ')[0] if quote.Date else '' }}">
+                                   value="{% if quote.Date %}{% if quote.Date is string %}{{ quote.Date.split(' ')[0] }}{% else %}{{ quote.Date.strftime('%Y-%m-%d') }}{% endif %}{% endif %}">
                         </td>
                         <td>{{ quote.Client }}</td>
                         <td>
