@@ -5,16 +5,15 @@ from datetime import datetime
 from bson import ObjectId
 from dotenv import load_dotenv
 import os
+from database import db
+from routes.quote_routes import quote_routes
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
+app.register_blueprint(quote_routes)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY')
-
-uri = os.getenv('MONGODB_URI')
-client = MongoClient(uri, server_api=ServerApi('1'))
-db = client.shower  # Use the 'shower' database
 
 # Routes
 @app.route('/init_test_data')
@@ -92,16 +91,13 @@ def convert_to_quote(lead_id):
         # Create new quote
         new_quote = {
             'lead_id': ObjectId(lead_id),
-            'first_name': lead['first_name'],
-            'last_name': lead['last_name'],
-            'email': lead['email'],
-            'phone': lead['phone'],
-            'suburb': lead.get('suburb', ''),
-            'service': lead['service'],
-            'source': lead['source'],  # Changed from lead.get('source', '') to ensure we get the source
-            'cons': 'DR',  # Default value
-            'ref': '',  # Empty reference to start
-            'details': lead.get('information', ''),
+            'Client': lead['first_name'] + ' ' + lead['last_name'],
+            'Suburb': lead.get('suburb', ''),
+            'Service': lead['service'],
+            'Source': lead['source'],  # Changed from lead.get('source', '') to ensure we get the source
+            'Cons': 'DR',  # Default value
+            'Ref': '',  # Empty reference to start
+            'Details': lead.get('information', ''),
             'created_at': datetime.utcnow()
         }
         print("Creating quote with source:", lead['source'])  # Debug print
@@ -112,28 +108,50 @@ def convert_to_quote(lead_id):
 def quotes():
     suburbs = list(db.suburbs.find({}, {"_id": 0, "Suburb": 1}).sort('Suburb', 1))
     if request.method == 'POST':
-        # Split client name into first and last name
-        client_name = request.form['client_name'].split(' ', 1)
-        first_name = client_name[0]
-        last_name = client_name[1] if len(client_name) > 1 else ''
-
         new_quote = {
             'ref': request.form.get('ref', ''),
             'cons': request.form['cons'],
             'source': request.form['source'],
-            'first_name': first_name,
-            'last_name': last_name,
+            'client': request.form['client_name'],
             'suburb': request.form['suburb'],
-            'amount': float(request.form['amount']) if request.form['amount'] else None,
+            'quote_value': float(request.form['amount']) if request.form['amount'] else None,
             'comments': request.form.get('comments', ''),
             'sold_value': float(request.form['sold_value']) if request.form['sold_value'] else None,
+            'date': request.form.get('date', datetime.utcnow().strftime('%Y-%m-%d')),
             'created_at': datetime.utcnow()
         }
         db.quotes.insert_one(new_quote)
         flash('Quote created successfully!', 'success')
         return redirect(url_for('quotes'))
     
+    # Fetch quotes and print debug info
     all_quotes = list(db.quotes.find().sort('created_at', -1))
+    print("\nDebug: First quote from MongoDB:")
+    if all_quotes:
+        print(f"Keys in first quote: {all_quotes[0].keys()}")
+        print(f"Full first quote: {all_quotes[0]}")
+    
+    # Convert date strings to datetime objects
+    for quote in all_quotes:
+        if isinstance(quote.get('created_at'), str):
+            try:
+                quote['created_at'] = datetime.strptime(quote['created_at'], '%Y-%m-%d %H:%M:%S')
+            except (ValueError, TypeError):
+                quote['created_at'] = datetime.utcnow()
+        
+        # Ensure numeric fields are floats
+        if 'quote_value' in quote and quote['quote_value'] is not None:
+            try:
+                quote['quote_value'] = float(quote['quote_value'])
+            except (ValueError, TypeError):
+                quote['quote_value'] = 0.0
+                
+        if 'sold_value' in quote and quote['sold_value'] is not None:
+            try:
+                quote['sold_value'] = float(quote['sold_value'])
+            except (ValueError, TypeError):
+                quote['sold_value'] = 0.0
+    
     return render_template('quotes.html', quotes=all_quotes, suburbs=suburbs)
 
 @app.route('/api/quotes/<quote_id>', methods=['PUT'])
@@ -143,10 +161,10 @@ def update_quote(quote_id):
         print("Received updates:", updates)  # Debug print
         
         # Convert string values to appropriate types
-        if 'amount' in updates:
-            updates['amount'] = float(updates['amount'])
-        if 'sold_value' in updates:
-            updates['sold_value'] = float(updates['sold_value'])
+        if 'Quote Value' in updates:
+            updates['Quote Value'] = float(updates['Quote Value'])
+        if 'Sold Value' in updates:
+            updates['Sold Value'] = float(updates['Sold Value'])
             
         # Update the quote in the database
         result = db.quotes.update_one(
@@ -164,6 +182,35 @@ def update_quote(quote_id):
     except Exception as e:
         print("Error updating quote:", str(e))  # Debug print
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/quotes/<quote_id>', methods=['DELETE'])
+def delete_quote(quote_id):
+    try:
+        print(f"Attempting to delete quote with ID: {quote_id}")  # Debug log
+        result = db.quotes.delete_one({'_id': ObjectId(quote_id)})
+        print(f"Delete result: {result.deleted_count}")  # Debug log
+        if result.deleted_count > 0:
+            return jsonify({'success': True, 'message': 'Quote deleted successfully'})
+        return jsonify({'success': False, 'message': 'Quote not found'}), 404
+    except Exception as e:
+        print("Error deleting quote:", str(e))
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/leads/<lead_id>', methods=['DELETE'])
+def delete_lead(lead_id):
+    try:
+        result = db.leads.delete_one({'_id': ObjectId(lead_id)})
+        if result.deleted_count > 0:
+            return jsonify({'success': True, 'message': 'Lead deleted successfully'})
+        return jsonify({'success': False, 'message': 'Lead not found'}), 404
+    except Exception as e:
+        print("Error deleting lead:", str(e))
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/debug_quotes')
+def debug_quotes():
+    quotes = list(db.quotes.find().sort('created_at', -1))
+    return jsonify([{k: str(v) if isinstance(v, ObjectId) else v for k, v in quote.items()} for quote in quotes])
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
