@@ -76,32 +76,32 @@ def init_test_data():
 
 @app.route('/add_suburb', methods=['POST'])
 def add_suburb():
-    print("Accessing add suburb route")
+    logger.info("Accessing add suburb route")
     try:
         new_suburb = request.form.get('new_suburb')
         if new_suburb:
             # Check if suburb already exists
-            existing = db.suburbs.find_one({'suburb': new_suburb})
+            existing = db.suburbs.find_one({'Suburb': new_suburb})
             if not existing:
-                db.suburbs.insert_one({'suburb': new_suburb})
+                db.suburbs.insert_one({'Suburb': new_suburb})
             return new_suburb
         return 'Error', 400
     except Exception as e:
-        print(f"Error in add suburb route: {str(e)}")
-        print(traceback.format_exc())
+        logger.error(f"Error in add suburb route: {str(e)}")
+        logger.error(traceback.format_exc())
         return str(e), 500
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
-    print("Accessing contact route")
+    logger.info("Accessing contact route")
     try:
-        # Get all suburbs, using lowercase 'suburb' field
-        print("Attempting to fetch suburbs from database")
-        suburbs = list(db.suburbs.find({}, {"_id": 0, "suburb": 1}))
-        print(f"Found suburbs: {suburbs}")
+        # Get all suburbs
+        logger.info("Attempting to fetch suburbs from database")
+        suburbs = list(db.suburbs.find({}, {"_id": 0, "Suburb": 1}))
+        logger.info(f"Found suburbs: {suburbs}")
         
         if request.method == 'POST':
-            print("Processing POST request")
+            logger.info("Processing POST request")
             new_lead = {
                 'first_name': request.form['first_name'],
                 'last_name': request.form['last_name'],
@@ -114,16 +114,16 @@ def contact():
                 'quoted': False,
                 'created_at': datetime.utcnow()
             }
-            print(f"Creating new lead: {new_lead}")
+            logger.info(f"Creating new lead: {new_lead}")
             db.leads.insert_one(new_lead)
             flash('Thank you for your inquiry! We will get back to you soon.', 'success')
             return redirect(url_for('contact'))
         
-        print("Rendering contact template")
+        logger.info("Rendering contact template")
         return render_template('contact.html', suburbs=suburbs)
     except Exception as e:
-        print(f"Error in contact route: {str(e)}")
-        print(traceback.format_exc())
+        logger.error(f"Error in contact route: {str(e)}")
+        logger.error(traceback.format_exc())
         return render_template('500.html'), 500
 
 @app.route('/leads')
